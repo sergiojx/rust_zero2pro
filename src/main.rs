@@ -13,5 +13,7 @@ use zero2prod::fun;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
-    fun().await
+    // Bubble up the io::Error if we failed to bind to address
+    // Otherwise call .await on our Server
+    fun()?.await
 }
