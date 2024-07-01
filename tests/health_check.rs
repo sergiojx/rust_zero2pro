@@ -8,6 +8,8 @@ use std::{clone, net::TcpListener};
 
 use reqwest::Client;
 
+use std::env;
+
 // Launch our application in the backgroud -somehow-
 // Spin up an instance of our application
 // and returns its address (i.e http://localhost:XXXX)
@@ -47,7 +49,7 @@ async fn subcribe_returns_a_200_for_valid_form_data() {
     // Arrange
     let app_address = spawn_app();
     let client = reqwest::Client::new();
-
+    
     // Act
     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
     let response = client
@@ -89,7 +91,7 @@ async fn subcribe_returns_a_400_when_data_is_missing() {
             400,
             response.status().as_u16(),
             // Additional customised error message on test failure
-            "The API did not fail with 400 NAd Request when the payload was {}.",
+            "The API did not fail with 400 Bad Request when the payload was {}.",
             error_message
         )
     }
