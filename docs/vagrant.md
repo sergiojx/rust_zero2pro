@@ -51,3 +51,7 @@ curl -v http://127.0.0.1:8080
 ```
 curl -v http://127.0.0.1:8080//health_check
 ```
+
+```
+curl -v -X POST -d "name=le%20guin&email=ursula_le_guin%40gmail.com" http://127.0.0.1:8080/subscriptions -H "Content-Type: application/x-www-form-urlencoded"
+```
