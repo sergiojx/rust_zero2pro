@@ -55,3 +55,19 @@ curl -v http://127.0.0.1:8080//health_check
 ```
 curl -v -X POST -d "name=le%20guin&email=ursula_le_guin%40gmail.com" http://127.0.0.1:8080/subscriptions -H "Content-Type: application/x-www-form-urlencoded"
 ```
+
+
+# sqlx-cli
+```
+cargo install --version="~0.7" sqlx-cli --no-default-features \
+  --features rustls,postgres
+```
+
+# psql
+```
+apt install postgresql-client
+```
+## Connect to a database
+```
+psql -U postgres -d newsletter -h localhost -p 5432
+```
