@@ -71,3 +71,8 @@ apt install postgresql-client
 ```
 psql -U postgres -d newsletter -h localhost -p 5432
 ```
+
+### Installing pgadmin
+```
+https://www.pgadmin.org/download/pgadmin-4-apt/
+```
