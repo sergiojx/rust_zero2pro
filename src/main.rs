@@ -9,7 +9,7 @@
 //     HttpResponse::Ok()
 // }
 use std::net::TcpListener;
-use zero2prod::fun;
+use zero2prod::startup::fun;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
