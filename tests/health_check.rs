@@ -9,7 +9,8 @@ use std::{clone, net::TcpListener};
 use reqwest::Client;
 
 use std::env;
-
+use sqlx::{PgConnection, Connection};
+use zero2prod::configuration::get_configuration;
 // Launch our application in the backgroud -somehow-
 // Spin up an instance of our application
 // and returns its address (i.e http://localhost:XXXX)
@@ -48,6 +49,17 @@ async fn health_check_works() {
 async fn subcribe_returns_a_200_for_valid_form_data() {
     // Arrange
     let app_address = spawn_app();
+
+    // data base connection
+    let configuration = get_configuration().expect("Failed to read configuration");
+    let db_connection_string = configuration.database.configuration_string();
+    // The `Connection` trait MUST be in scope for us to invoke
+    // `PgConnection::connect` - it is not an inherent method of the struct!
+    // println!("db_connection_string: {}", db_connection_string);
+    let mut db_connection = PgConnection::connect(&db_connection_string)
+        .await
+        .expect("Failed to connect to Postgres.");
+
     let client = reqwest::Client::new();
     
     // Act
@@ -62,6 +74,15 @@ async fn subcribe_returns_a_200_for_valid_form_data() {
 
     // Assert
     assert_eq!(200, response.status().as_u16());
+
+    let saved = sqlx::query!("SELECT email, name FROM subscriptions",)
+        .fetch_one(&mut db_connection)
+        .await
+        .expect("Failed to fetch saved subscription.");
+
+    assert_eq!(saved.email, "ursula_le_guin@gmail.com");
+    assert_eq!(saved.name, "le%20guin");
+
 }
 
 #[tokio::test]
@@ -96,4 +117,3 @@ async fn subcribe_returns_a_400_when_data_is_missing() {
         )
     }
 }
-
