@@ -20,6 +20,8 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 # unnecessary dependencies for projects that do not need it.
 serde = {version = "1", features = ["derive"]}
 serde_urlencoded = "0.7"
+# Adding this depndenci latter/down couses "use of undeclared ..." issues
+config = "0.13"
 
 # Using table-like toml syntax to avoid a super-long line!
 [dependencies.sqlx]
@@ -33,6 +35,8 @@ features = [
     "chrono",
     "migrate"
 ]
+
+
 
 # Dev dependencies are used exclusively when running tests or examples
 # They do not get included in the final application binay!
