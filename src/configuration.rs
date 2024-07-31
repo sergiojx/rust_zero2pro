@@ -21,6 +21,13 @@ impl DatabaseSettings {
         format!("postgres://{}:{}@{}:{}/{}",
         self.username,self.password,self.host,self.port,self.database_name)
     }
+
+    pub fn configuration_string_without_db(&self) -> String {
+        // Omitting the database name we connect to the Postgres instance,
+        // not a specific logicak database
+        format!("postgres://{}:{}@{}:{}",
+        self.username,self.password,self.host,self.port)
+    }
 }
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     // Initialise a configuration reader

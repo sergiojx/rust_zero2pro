@@ -10,8 +10,8 @@ use reqwest::Client;
 
 use std::env;
 use sqlx::{PgConnection, Connection, PgPool};
-use zero2prod::configuration::get_configuration;
-
+use zero2prod::configuration::{get_configuration, DatabaseSettings};
+use uuid::Uuid;
 
 
 pub struct TestApp {
@@ -27,10 +27,9 @@ async fn spawn_app() -> TestApp{
     let port = listener.local_addr().unwrap().port();
     let address = format!("http://0.0.0.0:{}", port);
 
-    let configuration = get_configuration().expect("Failed to read configuration.");
-    let db_connection_pool = PgPool::connect(&configuration.database.configuration_string())
-        .await
-        .expect("Failed to connect ot postgres.");
+    let mut configuration = get_configuration().expect("Failed to read configuration.");
+    configuration.database.database_name = Uuid::new_v4().to_string();
+    let db_connection_pool = configure_database(&configuration.database).await;
 
     let server = zero2prod::startup::fun(listener, db_connection_pool.clone()).expect("Failed to bind address");
     let _ = tokio::spawn(server);
@@ -40,6 +39,38 @@ async fn spawn_app() -> TestApp{
 
     }
     
+}
+
+
+pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
+    // Create database
+    let mut connection = PgConnection::connect(
+        &config.configuration_string_without_db()
+    )
+    .await
+    .expect("Failed to create database.");
+    
+    sqlx::query(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
+        .execute(&mut connection)
+        .await
+        .expect("Error creating database");
+    // connection
+    //     .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
+    //     .await
+    //     .expect("Failed to create database");
+
+    // Migrate database
+    let connection_pool = PgPool::connect(&config.configuration_string())
+        .await
+        .expect("Failed to connect to Postgres.");
+
+    sqlx::migrate!("./migrations")
+        .run(&connection_pool)
+        .await
+        .expect("failed to migrate the database");
+
+    connection_pool
+
 }
 
 #[tokio::test]
