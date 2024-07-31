@@ -11,16 +11,20 @@
 use std::net::TcpListener;
 use zero2prod::startup::fun;
 use zero2prod::configuration::get_configuration;
+use sqlx::{Connection,PgConnection, PgPool};
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
     // panic if we can not read configuration
     let configuration = get_configuration().expect("Failed to read configuration.");
+    let db_connection_pool = PgPool::connect(&configuration.database.configuration_string())
+        .await
+        .expect("Failed to connect to Postgres");
     // Hard coded 8080 is now optained from our settigs
     let address = format!("0.0.0.0:{}", configuration.application_port);
     let listener = TcpListener::bind(address).expect("Failed to bind random port");
     
     // Bubble up the io::Error if we failed to bind to address
     // Otherwise call .await on our See
-    fun(listener)?.await
+    fun(listener, db_connection_pool)?.await
 }
